@@ -19,16 +19,19 @@ Admin-only customer khata application for a local mart. Customers do not log in 
 docker compose up -d postgres
 ```
 If port 5432 is already used on your Mac, this project maps PostgreSQL to **5433** on the host.
-3. Install dependencies once, from the project root (npm workspaces; Node 22 recommended — Vite 7 needs Node 20.19+):
+3. Backend (Node 22 recommended — Vite 7 needs Node 20.19+):
 ```bash
+cd backend
+cp .env.example .env
 npm install
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
+npm run dev
 ```
-4. Run the backend and the frontend in two terminals:
+4. Frontend in another terminal:
 ```bash
-npm run dev:api
-npm run dev:web
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
 ```
 5. Open `http://localhost:5173`.
 
@@ -44,17 +47,16 @@ When a purchase is created, the current item name, Urdu name, category, unit and
 
 ## Project layout
 ```
-api/index.js        Vercel serverless entry — exports the Express app
-backend/src/app.js  Express app (routes, CORS, lazy DB init)
+backend/src/app.js     Express app (routes, CORS, lazy DB init) — Vercel service entrypoint
 backend/src/server.js  Local dev server (app.listen)
-frontend/           Vite + React admin UI
-vercel.json         Build, output and /api rewrites
+frontend/              Vite + React admin UI
+vercel.json            Vercel Services: backend at /api/*, frontend at everything else
 ```
 
 ## Deploy to Vercel (frontend + API + database)
-Everything runs in **one Vercel project**: the React app is served as static files, every `/api/*` request goes to the Express app running as a Vercel Function, and the database is Neon Postgres added from the Vercel Marketplace.
+Everything runs in **one Vercel project** using [Vercel Services](https://vercel.com/docs/services): the `frontend` service (Vite, static) serves every page, the `backend` service (Express, Vercel Function) receives every `/api/*` request with the `/api` prefix intact, and the database is Neon Postgres added from the Vercel Marketplace. The browser calls `/api` on the same domain, so no service bindings are needed.
 
-1. Push this folder to a GitHub/GitLab/Bitbucket repo and import it in Vercel (**Add New → Project**). Keep the **Root Directory** as the repo root; `vercel.json` already sets the build command and output directory.
+1. Push this folder to a GitHub/GitLab/Bitbucket repo and import it in Vercel (**Add New → Project**). Keep the **Root Directory** as the repo root (`./`). Vercel reads the `services` in `vercel.json` and builds `backend/` and `frontend/` separately, each with its own `package.json` and lockfile.
 2. In the project, open **Storage → Create Database → Neon (Postgres)** and connect it to the project. This adds `DATABASE_URL` (pooled) to the environment variables automatically.
 3. In **Settings → Environment Variables**, add:
    - `JWT_SECRET` — a long random string (e.g. `openssl rand -hex 32`)
