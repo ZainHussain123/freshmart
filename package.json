@@ -1,0 +1,12 @@
+{
+  "name": "freshmart-admin",
+  "private": true,
+  "type": "module",
+  "workspaces": ["backend", "frontend"],
+  "engines": { "node": "22.x" },
+  "scripts": {
+    "dev:api": "npm run dev -w backend --",
+    "dev:web": "npm run dev -w frontend --",
+    "build": "npm run build -w frontend"
+  }
+}

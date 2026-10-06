@@ -1,0 +1,2 @@
+import {Router} from 'express';import bcrypt from 'bcryptjs';import jwt from 'jsonwebtoken';import {query} from '../db.js';const r=Router();
+r.post('/login',async(req,res)=>{const e=req.body.email?.toLowerCase().trim(),p=req.body.password||'';const x=(await query('SELECT * FROM admins WHERE email=$1',[e])).rows[0];if(!x||!(await bcrypt.compare(p,x.password_hash)))return res.status(401).json({message:'Invalid email or password'});const u={id:x.id,name:x.name,email:x.email};res.json({user:u,token:jwt.sign(u,process.env.JWT_SECRET,{expiresIn:'8h'})})});export default r;

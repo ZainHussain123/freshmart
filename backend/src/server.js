@@ -1,0 +1,1 @@
+import app,{ensureDatabase} from './app.js';const port=process.env.PORT||5000;ensureDatabase().then(()=>app.listen(port,()=>console.log(`API http://localhost:${port}`))).catch(e=>{console.error(e);process.exit(1)});

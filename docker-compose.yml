@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: vegetable-mart-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vegetable_mart
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - vegetable_mart_pgdata:/var/lib/postgresql/data
+volumes:
+  vegetable_mart_pgdata:

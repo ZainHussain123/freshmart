@@ -1,0 +1,5 @@
+import express from 'express';import cors from 'cors';import dotenv from 'dotenv';import {initializeDatabase} from './seed.js';import auth from './routes/auth.js';import customers from './routes/customers.js';import products from './routes/products.js';import ledger from './routes/ledger.js';import dashboard from './routes/dashboard.js';dotenv.config();
+// Create/migrate tables once per server instance (once per cold start on Vercel). Retries on the next request if it fails.
+let ready;const ensureDatabase=()=>ready??=initializeDatabase().catch(e=>{ready=undefined;throw e});
+const app=express();app.use(cors({origin:process.env.CLIENT_URL||'http://localhost:5173'}));app.use(express.json());app.get('/api/health',(_q,s)=>s.json({ok:true}));app.use('/api',async(_q,_s,next)=>{try{await ensureDatabase();next()}catch(e){next(e)}});app.use('/api/auth',auth);app.use('/api/customers',customers);app.use('/api/products',products);app.use('/api/ledger',ledger);app.use('/api/dashboard',dashboard);
+export {ensureDatabase};export default app;
